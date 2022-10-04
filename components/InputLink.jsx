@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { Button, StyleSheet, TextInput, View } from "react-native";
-import Permission from "expo-permissions";
-import FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system";
 import isURL from "validator/lib/isURL";
 
-export default function InputLink({ setLinkImages }) {
+export default function InputLink({ setLinkImages, ...props }) {
   const [input, setInput] = useState("");
 
   const handleSaveLink = async () => {
-    const { status } = await Permission.askAsync(Permission.MEDIA_LIBRARY);
-    if (isURL(input) && status === "granted") {
+    if (isURL(input)) {
       const fileUri = FileSystem.documentDirectory + "linkImage/link.txt";
       await FileSystem.writeAsStringAsync(fileUri, input + ",");
       setLinkImages((prev) => [...prev, input]);
     }
   };
   return (
-    <View style={styles.container}>
+    <View {...props}>
       <TextInput value={input} onChangeText={setInput} />
       <Button onPress={handleSaveLink} title="Save Link" />
     </View>
@@ -24,7 +22,10 @@ export default function InputLink({ setLinkImages }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
   },
 });

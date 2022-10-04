@@ -1,10 +1,12 @@
 import { useKeenSliderNative } from "keen-slider/react-native";
-import { Button, Image, Text, View } from "react-native";
+import { Button, Image, View } from "react-native";
 
-export default function Slider({ takenImages, linkImages }) {
-  const slider = useKeenSliderNative({ slides: 6 });
+export default function Slider({ arrImage, ...props }) {
+  const slider = useKeenSliderNative({
+    slides: { perView: 1, number: arrImage.length },
+  });
   return (
-    <View style={styles.container}>
+    <View {...props}>
       <Button
         onPress={() => {
           let currentIdx = slider.track.details.abs;
@@ -14,13 +16,10 @@ export default function Slider({ takenImages, linkImages }) {
         title="Prev"
       />
       <View style={styles.slider} {...slider.containerProps}>
-        {[...Array(6).keys()].map((item, index) => {
+        {arrImage.map((uri, index) => {
           return (
-            <View key={index} {...slider.slidesProps[index]}>
-              <View style={{ ...styles.slide, backgroundColor: colors[index] }}>
-                {/* <Image source={{ uri: item }} style={styles.image} /> */}
-                <Text style={styles.text}>Slide {index + 1}</Text>
-              </View>
+            <View key={uri} {...slider.slidesProps[index]}>
+              <Image source={{ uri }} style={styles.slide} />
             </View>
           );
         })}
@@ -37,33 +36,17 @@ export default function Slider({ takenImages, linkImages }) {
   );
 }
 
-const colors = [
-  "#407CFE",
-  "#FF6540",
-  "#6AFC52",
-  "#3FD2FA",
-  "#FF3E5E",
-  "#8A45FF",
-];
-
 const styles = {
-  container: {
-    width: "100%",
-    height: "300%",
-    marginLeft: "32px",
-    marginRight: "32px",
-    flexDirection: "row",
-    alignItems: "center",
-  },
   button: {
-    width: "50px",
-    height: "50px",
+    flex: 1,
+    width: 50,
+    height: 50,
   },
   slider: {
+    flex: 4,
+    height: "80%",
     backgroundColor: "#fff",
     overflow: "hidden",
-    width: "100%",
-    height: "100%",
   },
   slide: {
     width: "100%",
@@ -71,10 +54,6 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "black",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
   },
   text: {
     color: "white",

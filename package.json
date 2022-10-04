@@ -24,7 +24,8 @@
     "react-native": "0.69.6",
     "react-native-web": "~0.18.7",
     "react-redux": "^8.0.4",
-    "validator": "^13.7.0"
+    "validator": "^13.7.0",
+    "expo-image-manipulator": "~10.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6"

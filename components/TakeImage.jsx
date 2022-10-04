@@ -1,16 +1,10 @@
 import { Camera, CameraType } from "expo-camera";
-import MediaLibrary from "expo-media-library";
+import * as MediaLibrary from "expo-media-library";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRef, useState } from "react";
-import {
-  View,
-  Button,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TouchableHighlight,
-} from "react-native";
+import { View, Button, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function Camera({ setTakenImages }) {
+export default function TakeImage({ setTakenImages, openCamera, ...props }) {
   const CameraRef = useRef();
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
@@ -29,20 +23,24 @@ export default function Camera({ setTakenImages }) {
       prev === CameraType.back ? CameraType.front : CameraType.back
     );
   };
-  const takePicture = () => {
-    CameraRef.current.takePicTureAsync({
-      onPictureSave: async (image) => {
-        const asset = await MediaLibrary.createAssetAsync(image.uri);
-        let album = await MediaLibrary.getAlbumAsync("ImageTaken");
-        if (album == null)
-          await MediaLibrary.createAlbumAsync("ImageTaken", asset, false);
-        else await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-        setTakenImages((prev) => [...prev, image.uri]);
-      },
-    });
+  const takePicture = async () => {
+    let { uri } = await CameraRef.current.takePictureAsync();
+    if (type == CameraType.front) {
+      const manipulatedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ rotate: 180 }, { flip: ImageManipulator.FlipType.Vertical }],
+        { compress: 1 }
+      );
+      uri = manipulatedImage.uri;
+    }
+    const asset = await MediaLibrary.createAssetAsync(uri);
+    let album = await MediaLibrary.getAlbumAsync("ImageTaken");
+    await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+    setTakenImages((prev) => [...prev, uri]);
+    openCamera(false);
   };
   return (
-    <Camera ref={CameraRef} style={styles.camera} type={type}>
+    <Camera ref={CameraRef} type={type} {...props}>
       <TouchableOpacity
         style={styles.buttonContainer}
         onPress={toggleCameraType}
@@ -51,7 +49,7 @@ export default function Camera({ setTakenImages }) {
           <Text style={styles.text}>Flip Camera</Text>
         </View>
       </TouchableOpacity>
-      <TouchableHighlight
+      <TouchableOpacity
         style={styles.buttonContainer}
         underlayColor={"white"}
         onPress={takePicture}
@@ -59,15 +57,12 @@ export default function Camera({ setTakenImages }) {
         <View style={styles.button}>
           <Text style={styles.text}>Take Picture</Text>
         </View>
-      </TouchableHighlight>
+      </TouchableOpacity>
     </Camera>
   );
 }
 
 const styles = StyleSheet.create({
-  camera: {
-    flex: 1,
-  },
   buttonContainer: {
     flex: 1,
     flexDirection: "row",
