@@ -30,6 +30,11 @@ export default function App() {
         let result = await takenImageArr();
         setTakenImages(result);
 
+        // const linkDir = FileSystem.documentDirectory + "linkImage/link.txt";
+        // await FileSystem.deleteAsync(linkDir);
+        // const dirInfo = await FileSystem.getInfoAsync(linkDir);
+        // console.log(dirInfo);
+
         const ensureDirExist = async () => {
           const linkDir = FileSystem.documentDirectory + "linkImage/";
           const dirInfo = await FileSystem.getInfoAsync(linkDir);
@@ -42,7 +47,8 @@ export default function App() {
           const linkDir = FileSystem.documentDirectory + "linkImage/link.txt";
           ensureDirExist();
           const links = await FileSystem.readAsStringAsync(linkDir);
-          return links.split(",");
+          const uriArr = links.split(",").filter((value) => value !== "");
+          return uriArr;
         };
         result = await linkImageArr();
         setLinkImages(result);
@@ -52,6 +58,8 @@ export default function App() {
     };
     runEffect();
   }, []);
+
+  console.log(linkImages);
 
   if (!permission) return null;
   if (!permission.granted)

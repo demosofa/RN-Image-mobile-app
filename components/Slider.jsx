@@ -27,7 +27,8 @@ export default function Slider({ arrImage, ...props }) {
       <Button
         onPress={() => {
           let currentIdx = slider.track.details.abs;
-          if (currentIdx + 1 <= 5) slider.moveToIdx(currentIdx + 1);
+          if (currentIdx + 1 <= arrImage.length)
+            slider.moveToIdx(currentIdx + 1);
         }}
         style={styles.button}
         title="Next"

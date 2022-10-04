@@ -11,11 +11,12 @@ export default function InputLink({ setLinkImages, ...props }) {
       const fileUri = FileSystem.documentDirectory + "linkImage/link.txt";
       await FileSystem.writeAsStringAsync(fileUri, input + ",");
       setLinkImages((prev) => [...prev, input]);
+      setInput("");
     }
   };
   return (
     <View {...props}>
-      <TextInput value={input} onChangeText={setInput} />
+      <TextInput style={styles.input} value={input} onChangeText={setInput} />
       <Button onPress={handleSaveLink} title="Save Link" />
     </View>
   );
@@ -23,9 +24,12 @@ export default function InputLink({ setLinkImages, ...props }) {
 
 const styles = StyleSheet.create({
   input: {
+    width: 200,
     height: 40,
     margin: 12,
     borderWidth: 1,
+    borderColor: "black",
     padding: 10,
+    margin: 8,
   },
 });

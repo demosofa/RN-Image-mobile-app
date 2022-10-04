@@ -1,13 +1,30 @@
 import { Camera, CameraType } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from "expo-image-manipulator";
-import { useRef, useState } from "react";
-import { View, Button, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  View,
+  Button,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
 
 export default function TakeImage({ setTakenImages, openCamera, ...props }) {
   const CameraRef = useRef();
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
+  useEffect(() => {
+    const backhandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      function () {
+        openCamera(false);
+        return true;
+      }
+    );
+    return () => backhandler.remove();
+  }, []);
   if (!permission) return null;
   if (!permission.granted)
     return (
@@ -18,6 +35,7 @@ export default function TakeImage({ setTakenImages, openCamera, ...props }) {
         <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
+
   const toggleCameraType = () => {
     setType((prev) =>
       prev === CameraType.back ? CameraType.front : CameraType.back
