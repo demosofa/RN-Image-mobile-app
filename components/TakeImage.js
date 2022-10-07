@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   BackHandler,
+  Alert,
 } from "react-native";
 
 export default function TakeImage({ setTakenImages, openCamera, ...props }) {
@@ -42,20 +43,27 @@ export default function TakeImage({ setTakenImages, openCamera, ...props }) {
     );
   };
   const takePicture = async () => {
-    let { uri } = await CameraRef.current.takePictureAsync();
-    if (type == CameraType.front) {
-      const manipulatedImage = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ rotate: 180 }, { flip: ImageManipulator.FlipType.Vertical }],
-        { compress: 1 }
-      );
-      uri = manipulatedImage.uri;
+    try {
+      let { uri } = await CameraRef.current.takePictureAsync();
+      if (type == CameraType.front) {
+        const manipulatedImage = await ImageManipulator.manipulateAsync(
+          uri,
+          [{ rotate: 180 }, { flip: ImageManipulator.FlipType.Vertical }],
+          { compress: 1 }
+        );
+        uri = manipulatedImage.uri;
+      }
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      let album = await MediaLibrary.getAlbumAsync("ImageTaken");
+      if (album == null)
+        await MediaLibrary.createAlbumAsync("ImageTaken", asset, false);
+      else await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+      setTakenImages((prev) => [...prev, uri]);
+      openCamera(false);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", error.message);
     }
-    const asset = await MediaLibrary.createAssetAsync(uri);
-    let album = await MediaLibrary.getAlbumAsync("ImageTaken");
-    await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-    setTakenImages((prev) => [...prev, uri]);
-    openCamera(false);
   };
   return (
     <Camera ref={CameraRef} type={type} {...props}>

@@ -18,8 +18,7 @@ export default function App() {
       try {
         const takenImageArr = async () => {
           let album = await MediaLibrary.getAlbumAsync("ImageTaken");
-          if (album == null)
-            album = await MediaLibrary.createAlbumAsync("ImageTaken");
+          if (!album) return [];
           const imageFiles = await MediaLibrary.getAssetsAsync({
             album,
             mediaType: "photo",
