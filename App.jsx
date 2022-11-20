@@ -58,8 +58,6 @@ export default function App() {
     runEffect();
   }, []);
 
-  console.log(linkImages);
-
   if (!permission) return null;
   if (!permission.granted)
     return (

@@ -2,16 +2,11 @@ import { useKeenSliderNative } from "keen-slider/react-native";
 import { Button, Image, View } from "react-native";
 
 export default function Slider({ arrImage, ...props }) {
-  const slider = useKeenSliderNative({
-    slides: { perView: 1, number: arrImage.length },
-  });
+  const slider = useKeenSliderNative();
   return (
     <View {...props}>
       <Button
-        onPress={() => {
-          let currentIdx = slider.track.details.abs;
-          if (currentIdx - 1 >= 0) slider.moveToIdx(currentIdx - 1);
-        }}
+        onPress={() => slider.prev()}
         style={styles.button}
         title="Prev"
       />
@@ -25,11 +20,7 @@ export default function Slider({ arrImage, ...props }) {
         })}
       </View>
       <Button
-        onPress={() => {
-          let currentIdx = slider.track.details.abs;
-          if (currentIdx + 1 <= arrImage.length)
-            slider.moveToIdx(currentIdx + 1);
-        }}
+        onPress={() => slider.next()}
         style={styles.button}
         title="Next"
       />
