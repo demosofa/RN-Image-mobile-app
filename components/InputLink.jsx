@@ -3,6 +3,7 @@ import { Alert, Button, StyleSheet, TextInput, View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import Toast from "react-native-toast-message";
 import isURL from "validator/lib/isURL";
+import { ensureDirExist } from "../utils";
 
 export default function InputLink({ setLinkImages, ...props }) {
   const [input, setInput] = useState("");
@@ -10,9 +11,14 @@ export default function InputLink({ setLinkImages, ...props }) {
   const handleSaveLink = async () => {
     try {
       if (isURL(input)) {
-        const fileUri = FileSystem.documentDirectory + "linkImage/link.txt";
-        const prevData = await FileSystem.readAsStringAsync(fileUri);
-        await FileSystem.writeAsStringAsync(fileUri, prevData + input + ",");
+        const linkDir = FileSystem.documentDirectory + "linkImage/";
+        const check = await ensureDirExist(linkDir, true);
+        const linkUri = linkDir + "link.txt";
+        let initData = "";
+        if (check) {
+          initData = await FileSystem.readAsStringAsync(linkUri);
+        }
+        await FileSystem.writeAsStringAsync(linkUri, initData + input + ",");
         setLinkImages((prev) => [...prev, input]);
         setInput("");
       } else

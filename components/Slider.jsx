@@ -2,7 +2,11 @@ import { useKeenSliderNative } from "keen-slider/react-native";
 import { Button, Image, View } from "react-native";
 
 export default function Slider({ arrImage, ...props }) {
-  const slider = useKeenSliderNative();
+  const slider = useKeenSliderNative({
+    slides: {
+      number: arrImage.length,
+    },
+  });
   return (
     <View {...props}>
       <Button

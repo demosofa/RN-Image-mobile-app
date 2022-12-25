@@ -3,9 +3,13 @@ import { Alert, Button, StyleSheet, Text, View } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import * as FileSystem from "expo-file-system";
 import { TakeImage, InputLink, Slider } from "./components";
+import { ensureDirExist } from "./utils";
 
 export default function App() {
-  const [permission, requestPermission] = MediaLibrary.usePermissions();
+  const [permission, requestPermission] = MediaLibrary.usePermissions({
+    request: true,
+    writeOnly: true,
+  });
   const [linkImages, setLinkImages] = useState([]);
   const [takenImages, setTakenImages] = useState([]);
   const [openCamera, setOpenCamera] = useState(false);
@@ -34,41 +38,25 @@ export default function App() {
         // const dirInfo = await FileSystem.getInfoAsync(linkDir);
         // console.log(dirInfo);
 
-        const ensureDirExist = async () => {
-          const linkDir = FileSystem.documentDirectory + "linkImage/";
-          const dirInfo = await FileSystem.getInfoAsync(linkDir);
-          if (!dirInfo.exists)
-            await FileSystem.makeDirectoryAsync(linkDir, {
-              intermediates: true,
-            });
-        };
         const linkImageArr = async () => {
-          const linkDir = FileSystem.documentDirectory + "linkImage/link.txt";
-          ensureDirExist();
-          const links = await FileSystem.readAsStringAsync(linkDir);
+          const linkDir = FileSystem.documentDirectory + "linkImage/";
+          const linkUri = linkDir + "link.txt";
+          const check = await ensureDirExist(linkUri);
+          if (!check) return [];
+          const links = await FileSystem.readAsStringAsync(linkUri);
           const uriArr = links.split(",").filter((value) => value !== "");
           return uriArr;
         };
         result = await linkImageArr();
         setLinkImages(result);
       } catch (error) {
-        Alert.alert(error.message);
+        console.log(error);
       }
     };
     runEffect();
-  }, []);
+  }, [permission]);
 
-  if (!permission) return null;
-  if (!permission.granted)
-    return (
-      <View>
-        <Text style={{ textAlign: "center" }}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
-  if (permission.granted && openCamera)
+  if (openCamera)
     return (
       <TakeImage
         style={styles.camera}
@@ -85,7 +73,10 @@ export default function App() {
         <Text>There is any image to display</Text>
       )}
       <Button
-        onPress={() => setOpenCamera((prev) => !prev)}
+        onPress={() => {
+          if (!permission.granted) requestPermission();
+          else setOpenCamera((prev) => !prev);
+        }}
         title="Open Camera"
       />
     </View>
