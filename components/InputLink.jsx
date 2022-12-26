@@ -5,7 +5,7 @@ import Toast from "react-native-toast-message";
 import isURL from "validator/lib/isURL";
 import { ensureDirExist } from "../utils";
 
-export default function InputLink({ setLinkImages, ...props }) {
+export default function InputLink({ setArrImage, ...props }) {
   const [input, setInput] = useState("");
 
   const handleSaveLink = async () => {
@@ -19,7 +19,7 @@ export default function InputLink({ setLinkImages, ...props }) {
           initData = await FileSystem.readAsStringAsync(linkUri);
         }
         await FileSystem.writeAsStringAsync(linkUri, initData + input + ",");
-        setLinkImages((prev) => [...prev, input]);
+        setArrImage((prev) => [...prev, input]);
         setInput("");
       } else
         Toast.show({ type: "error", text1: "This input is not like an URL" });

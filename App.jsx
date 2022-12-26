@@ -2,37 +2,27 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, StyleSheet, Text, View } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import * as FileSystem from "expo-file-system";
+import { Camera } from "expo-camera";
 import { TakeImage, InputLink, Slider } from "./components";
 import { ensureDirExist } from "./utils";
 
 export default function App() {
-  const [permission, requestPermission] = MediaLibrary.usePermissions({
-    request: true,
-    writeOnly: true,
-  });
-  const [linkImages, setLinkImages] = useState([]);
-  const [takenImages, setTakenImages] = useState([]);
-  const [openCamera, setOpenCamera] = useState(false);
-  const arrImage = useMemo(
-    () => [...linkImages, ...takenImages],
-    [linkImages, takenImages]
+  const [cameraPermission, requestCameraPermission] =
+    Camera.useCameraPermissions({ request: true });
+  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions(
+    { request: true }
   );
+  const [arrImage, setArrImage] = useState([]);
+  const [openCamera, setOpenCamera] = useState(false);
+
+  const handleOpenCamera = async () => {
+    if (!cameraPermission.granted) await requestCameraPermission();
+    if (!mediaPermission.granted) await requestMediaPermission();
+    setOpenCamera((prev) => !prev);
+  };
   useEffect(() => {
     const runEffect = async () => {
       try {
-        const takenImageArr = async () => {
-          let album = await MediaLibrary.getAlbumAsync("ImageTaken");
-          if (!album) return [];
-          const imageFiles = await MediaLibrary.getAssetsAsync({
-            album,
-            mediaType: "photo",
-          });
-          const uriArr = imageFiles.assets.map((asset) => asset.uri);
-          return uriArr;
-        };
-        let result = await takenImageArr();
-        setTakenImages(result);
-
         // const linkDir = FileSystem.documentDirectory + "linkImage/link.txt";
         // await FileSystem.deleteAsync(linkDir);
         // const dirInfo = await FileSystem.getInfoAsync(linkDir);
@@ -48,37 +38,46 @@ export default function App() {
           return uriArr;
         };
         result = await linkImageArr();
-        setLinkImages(result);
+        setArrImage(result);
+
+        const takenImageArr = async () => {
+          let album = await MediaLibrary.getAlbumAsync("ImageTaken");
+          if (!album) return [];
+          const imageFiles = await MediaLibrary.getAssetsAsync({
+            album,
+            mediaType: "photo",
+          });
+          const uriArr = imageFiles.assets.map((asset) => asset.uri);
+          return uriArr;
+        };
+        if (mediaPermission && mediaPermission.granted) {
+          let result = await takenImageArr();
+          setArrImage(result);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     runEffect();
-  }, [permission]);
+  }, [mediaPermission]);
 
-  if (openCamera)
+  if (openCamera && cameraPermission.granted && mediaPermission.granted)
     return (
       <TakeImage
         style={styles.camera}
-        setTakenImages={setTakenImages}
+        setArrImage={setArrImage}
         openCamera={setOpenCamera}
       />
     );
   return (
     <View style={styles.container}>
-      <InputLink style={styles.inputContainer} setLinkImages={setLinkImages} />
+      <InputLink style={styles.inputContainer} setArrImage={setArrImage} />
       {arrImage.length ? (
         <Slider style={styles.slideContainer} arrImage={arrImage} />
       ) : (
         <Text>There is any image to display</Text>
       )}
-      <Button
-        onPress={() => {
-          if (!permission.granted) requestPermission();
-          else setOpenCamera((prev) => !prev);
-        }}
-        title="Open Camera"
-      />
+      <Button onPress={handleOpenCamera} title="Open Camera" />
     </View>
   );
 }

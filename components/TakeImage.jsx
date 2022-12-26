@@ -4,7 +4,6 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { useEffect, useRef, useState } from "react";
 import {
   View,
-  Button,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -12,10 +11,10 @@ import {
   Alert,
 } from "react-native";
 
-export default function TakeImage({ setTakenImages, openCamera, ...props }) {
+export default function TakeImage({ setArrImage, openCamera, ...props }) {
   const CameraRef = useRef();
   const [type, setType] = useState(CameraType.back);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+
   useEffect(() => {
     const backhandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -26,16 +25,6 @@ export default function TakeImage({ setTakenImages, openCamera, ...props }) {
     );
     return () => backhandler.remove();
   }, []);
-  if (!permission) return null;
-  if (!permission.granted)
-    return (
-      <View>
-        <Text style={{ textAlign: "center" }}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestPermission} title="grant permission" />
-      </View>
-    );
 
   const toggleCameraType = () => {
     setType((prev) =>
@@ -58,11 +47,10 @@ export default function TakeImage({ setTakenImages, openCamera, ...props }) {
       if (album == null)
         await MediaLibrary.createAlbumAsync("ImageTaken", asset, false);
       else await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-      setTakenImages((prev) => [...prev, uri]);
+      setArrImage((prev) => [...prev, uri]);
       openCamera(false);
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", error.message);
     }
   };
   return (
