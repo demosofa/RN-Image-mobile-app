@@ -1,14 +1,13 @@
 import { Camera, CameraType } from "expo-camera";
-import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from "expo-image-manipulator";
+import * as MediaLibrary from "expo-media-library";
 import { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   BackHandler,
-  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function TakeImage({ setArrImage, openCamera, ...props }) {
@@ -16,14 +15,14 @@ export default function TakeImage({ setArrImage, openCamera, ...props }) {
   const [type, setType] = useState(CameraType.back);
 
   useEffect(() => {
-    const backhandler = BackHandler.addEventListener(
+    const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
       function () {
         openCamera(false);
         return true;
       }
     );
-    return () => backhandler.remove();
+    return () => backHandler.remove();
   }, []);
 
   const toggleCameraType = () => {

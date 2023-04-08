@@ -8,7 +8,7 @@ import { ensureDirExist } from "./utils";
 
 export default function App() {
   const [cameraPermission, requestCameraPermission] =
-    Camera.useCameraPermissions({ request: true });
+    Camera.useCameraPermissions();
   const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions(
     { request: true }
   );
