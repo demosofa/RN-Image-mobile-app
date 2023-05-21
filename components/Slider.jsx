@@ -1,12 +1,14 @@
 import { useKeenSliderNative } from "keen-slider/react-native";
-import { useEffect } from "react";
 import { Button, Image, View } from "react-native";
 
 export default function Slider({ arrImage, ...props }) {
-  const slider = useKeenSliderNative({ slides: arrImage.length });
-  useEffect(() => {
-    slider.update({ slides: arrImage.length });
-  }, [arrImage]);
+  const slider = useKeenSliderNative({
+    slides: arrImage.length,
+    slideChanged: ({ next, update }) => {
+      update();
+      next();
+    },
+  });
   return (
     <View {...props}>
       <Button onPress={slider.prev} style={styles.button} title="Prev" />
