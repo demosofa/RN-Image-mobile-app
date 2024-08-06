@@ -4,17 +4,13 @@ import { Button, Image, View } from "react-native";
 export default function Slider({ arrImage, ...props }) {
   const slider = useKeenSliderNative({
     slides: arrImage.length,
-    slideChanged: ({ next, update }) => {
-      update();
-      next();
-    },
   });
   return (
     <View {...props}>
       <Button onPress={slider.prev} style={styles.button} title="Prev" />
       <View style={styles.slider} {...slider.containerProps}>
         {arrImage.map((uri, index) => (
-          <View key={uri} {...slider.slidesProps[index]}>
+          <View key={uri + index} {...slider.slidesProps[index]}>
             <Image source={{ uri }} style={styles.slide} />
           </View>
         ))}
